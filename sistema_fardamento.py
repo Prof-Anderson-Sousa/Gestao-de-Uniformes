@@ -99,7 +99,7 @@ def voltar_para_menu(janela_atual, usuario_logado):
 def iniciar_interface(usuario_logado):
     janela = tk.Tk()
     janela.title("Controle de Fardamentos")
-    janela.geometry("520x340")
+    janela.geometry("500x300")  # aumentei um pouco a altura para caber o espaço
     janela.resizable(False, False)
     janela.configure(bg=COR_FUNDO)
 
@@ -107,28 +107,50 @@ def iniciar_interface(usuario_logado):
     frame.pack(pady=10)
     frame.grid_columnconfigure(0, minsize=120)
 
-    btn_voltar = criar_botao(janela, "⬅ Voltar", lambda: voltar_para_menu(janela, usuario_logado), COR_AMARELO, "black", largura=110, altura=35)
+    # Botão voltar
+    btn_voltar = criar_botao(
+        janela,
+        "⬅ Voltar",
+        lambda: voltar_para_menu(janela, usuario_logado),
+        COR_AMARELO,
+        "black",
+        largura=110,
+        altura=35
+    )
     btn_voltar.place(x=10, y=10)
 
-    tk.Label(frame, text="Colaborador:", font=("Segoe UI", 10, "bold"), bg=COR_FUNDO).grid(row=0, column=0, sticky="w", padx=5, pady=5)
+    # Espaçamento horizontal (50px de altura)
+    tk.Frame(frame, height=50, bg=COR_FUNDO).grid(row=0, column=0, columnspan=2)
+
+    # Campo colaborador
+    tk.Label(frame, text="Colaborador:", font=("Segoe UI", 10, "bold"), bg=COR_FUNDO).grid(row=1, column=0, sticky="w", padx=5, pady=5)
     colaborador_var = tk.StringVar()
     colaborador_combo = ttk.Combobox(frame, textvariable=colaborador_var, values=carregar_colaboradores(), width=30)
-    colaborador_combo.grid(row=0, column=1, padx=5, pady=5)
+    colaborador_combo.grid(row=1, column=1, padx=5, pady=5)
     colaborador_combo.bind("<KeyRelease>", lambda e: filtrar_colaboradores(colaborador_combo, colaborador_var))
 
-    tk.Label(frame, text="Tipo de Farda:", font=("Segoe UI", 10, "bold"), bg=COR_FUNDO).grid(row=1, column=0, sticky="w", padx=5, pady=5)
+    # Campo tipo de farda
+    tk.Label(frame, text="Tipo de Farda:", font=("Segoe UI", 10, "bold"), bg=COR_FUNDO).grid(row=2, column=0, sticky="w", padx=5, pady=5)
     tipo_var = tk.StringVar()
     tipo_combo = ttk.Combobox(frame, textvariable=tipo_var, values=TIPOS, width=30)
-    tipo_combo.grid(row=1, column=1, padx=5, pady=5)
+    tipo_combo.grid(row=2, column=1, padx=5, pady=5)
     tipo_combo.current(0)
 
-    tk.Label(frame, text="Código de Barras:", font=("Segoe UI", 10, "bold"), bg=COR_FUNDO).grid(row=2, column=0, sticky="w", padx=5, pady=5)
+    # Campo código de barras
+    tk.Label(frame, text="Código de Barras:", font=("Segoe UI", 10, "bold"), bg=COR_FUNDO).grid(row=3, column=0, sticky="w", padx=5, pady=5)
     codigo_entry = ttk.Entry(frame, width=33)
-    codigo_entry.grid(row=2, column=1, padx=5, pady=10, ipady=5)
+    codigo_entry.grid(row=3, column=1, padx=5, pady=10, ipady=5)
 
+    # Botões
     botoes_frame = tk.Frame(janela, bg=COR_FUNDO)
     botoes_frame.pack(pady=30)
 
-    criar_botao(botoes_frame, "\ud83d\udce6 Retirar", lambda: registrar_acao("Retirada", colaborador_var, tipo_var, codigo_entry), COR_VERDE, "white").pack(side="left", padx=20)
+    criar_botao(
+        botoes_frame,
+        "📦 Retirar",
+        lambda: registrar_acao("Retirada", colaborador_var, tipo_var, codigo_entry),
+        COR_VERDE,
+        "white"
+    ).pack(side="left", padx=20)
 
     janela.mainloop()
