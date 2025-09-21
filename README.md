@@ -1,21 +1,29 @@
-# 👕 Sistema de Controle de Fardamento
+# 👕 Sistema de Gestão de Fardamentos
 
-Aplicação desktop em **Python** para gerenciar a retirada e devolução de fardamentos por colaboradores, com controle de usuários e interface gráfica amigável.
+Este projeto foi desenvolvido em **Python + Tkinter + PostgreSQL** para auxiliar no controle de retirada e devolução de fardamentos por colaboradores.
 
 ## 🚀 Funcionalidades
-- 🔐 Login com níveis de acesso (admin e usuários padrão)
-- 📦 Registro de retiradas e devoluções por código de barras
-- 📊 Consulta e exportação de registros para Excel
-- 🖥 Interface visual simples e eficiente
-- 💾 Banco de dados local em SQLite
+- Login com senha criptografada (bcrypt)
+- Painel administrativo
+  - Criar, alterar e excluir usuários (com regras de senha forte e captcha para exclusão)
+  - Gerenciar colaboradores (adicionar/remover)
+  - Exportar registros em Excel
+- Registro de retirada e devolução de fardas
+- Controle por código de barras
+- Interface simples e intuitiva
 
-## ▶ Como executar
-Execute o arquivo principal:
+## 🛠 Tecnologias utilizadas
+- **Python 3.11**
+- **Tkinter** (interface gráfica)
+- **PostgreSQL** (banco de dados)
+- **psycopg2** (conector PostgreSQL)
+- **bcrypt** (hash de senha)
+- **python-dotenv** (variáveis de ambiente)
+- **openpyxl** (exportação Excel)
 
-```bash
-python login.py
-```
+## 📦 Instalação
 
-A primeira tela será a de login do sistema.
-
----
+1. Clone o repositório:
+   ```bash
+   git clone https://github.com/seu-usuario/gestao-de-fardamentos.git
+   cd gestao-de-fardamentos

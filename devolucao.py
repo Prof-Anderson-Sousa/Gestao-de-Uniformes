@@ -9,7 +9,7 @@ COR_FUNDO = "#f2f2f2"
 COR_TEXTO = "#333333"
 COR_VERDE = "#5c7144"
 
-def tela_devolucao(voltar_callback):
+def tela_devolucao(voltar_callback, usuario_logado):
     janela = tk.Tk()
     janela.title("Devolução de Fardas")
     janela.geometry("720x480")
@@ -92,11 +92,11 @@ def tela_devolucao(voltar_callback):
 
             conn = conectar()
             cursor = conn.cursor()
-            cursor.execute("SELECT id, nome FROM registros WHERE codigo = ? AND data_devolucao IS NULL ORDER BY id DESC LIMIT 1", (codigo,))
+            cursor.execute("SELECT id, nome FROM registros WHERE codigo = %s AND data_devolucao IS NULL ORDER BY id DESC LIMIT 1", (codigo,))
             resultado = cursor.fetchone()
             if resultado:
                 id_registro, nome = resultado
-                cursor.execute("UPDATE registros SET data_devolucao = ?, hora_devolucao = ? WHERE id = ?", (data, hora, id_registro))
+                cursor.execute("UPDATE registros SET data_devolucao = %s, hora_devolucao = %s WHERE id = %s", (data, hora, id_registro))
                 conn.commit()
                 messagebox.showinfo("Sucesso", f"Devolução registrada para {nome}.")
                 atualizar_tabela()
@@ -110,7 +110,7 @@ def tela_devolucao(voltar_callback):
     codigo_var.trace_add("write", registrar_devolucao_auto)
 
     # Botão voltar
-    criar_botao(janela, "⬅ Voltar", lambda: [janela.destroy(), voltar_callback()], COR_AMARELO, "black").pack(pady=10)
+    criar_botao(janela, "⬅ Voltar", lambda: [janela.destroy(), voltar_callback(usuario_logado)], COR_AMARELO, "black").pack(pady=10)
 
     atualizar_tabela()
     janela.mainloop()

@@ -2,32 +2,16 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 from datetime import datetime
 from PIL import Image, ImageTk
-import sqlite3
 from banco import conectar
 import os
 
-COLABORADORES = [
-    "Amanda Silva", "Bruno Oliveira", "Carla Souza", "Daniel Costa", "Eduarda Rocha",
-    "Felipe Lima", "Gabriela Martins", "Henrique Almeida", "Isabela Teixeira", "João Victor",
-    "Kátia Nunes", "Lucas Andrade", "Mariana Ribeiro", "Nicolas Azevedo", "Otávio Freitas",
-    "Patrícia Mendes", "Quésia Moura", "Rafael Torres", "Simone Figueiredo", "Thiago Moreira",
-    "Ursula Ferreira", "Vinícius Castro", "Wesley Carvalho", "Xênia Duarte", "Yasmin Ramos",
-    "Zuleika Barbosa", "Alana Cruz", "Breno Gomes", "Camila Rezende", "Diego Antunes",
-    "Eliane Barros", "Fabiano Brito", "Giovana Lopes", "Heitor Braga", "Ítalo Pires",
-    "Jéssica Campos", "Kaio Santana", "Letícia Macedo", "Marcelo Lima", "Nathalia Rios",
-    "Otília Soares", "Pedro Henrique", "Queila Amorim", "Renata Dantas", "Samuel Corrêa",
-    "Talita Cardoso", "Ulisses Matos", "Valéria Dias", "Willian Guimarães", "Xavier Peixoto",
-    "Yuri Fonseca", "Zenaide Queiroz", "Arthur Silva", "Beatriz Melo", "Cauã Tavares",
-    "Débora Aragão", "Emanuel Silveira", "Fernanda Pinheiro", "Guilherme Cunha", "Heloísa Lacerda",
-    "Iago Neves", "Júlia Viana", "Kleber Monteiro", "Lorena Sales", "Miguel Prado",
-    "Nicole Barreto", "Orlando Meireles", "Priscila Veloso", "Queiroz Santana", "Rodrigo Milani",
-    "Sara Menezes", "Tatiane Falcão", "Uelton Rocha", "Vanessa Leal", "Wellington Gomes",
-    "Ximena Porto", "Yago Fernandes", "Zilda Trindade", "Aline Corrêa", "Bernardo Alves",
-    "Clara Mattos", "Davi Martins", "Elaine Vieira", "Fábio Soares", "Giovanni Almeida",
-    "Helena Braga", "Igor Nascimento", "Janaína Xavier", "Kelvin Costa", "Larissa Bezerra",
-    "Maurício Paiva", "Natasha Moura", "Otto Silva", "Paula Rezende", "Quintino Dias",
-    "Rute Goulart", "Sandro Torres", "Tainá Gomes", "Ubirajara Lopes", "Viviane Silva"
-]
+def carregar_colaboradores():
+    conn = conectar()
+    cursor = conn.cursor()
+    cursor.execute("SELECT nome FROM colaboradores ORDER BY nome ASC")
+    colaboradores = [row[0] for row in cursor.fetchall()]
+    conn.close()
+    return colaboradores
 
 TIPOS = ["Camisa", "Calça"]
 COR_FUNDO = "#f2f2f2"
@@ -56,22 +40,22 @@ def registrar_acao(acao, colaborador_var, tipo_var, codigo_entry):
             conn.close()
             return
 
-        cursor.execute("SELECT 1 FROM registros WHERE codigo = ? AND data_devolucao IS NULL", (codigo,))
+        cursor.execute("SELECT 1 FROM registros WHERE codigo = %s AND data_devolucao IS NULL", (codigo,))
         if cursor.fetchone():
             messagebox.showerror("Erro", "Essa farda já foi retirada e não foi devolvida.")
         else:
-            cursor.execute("INSERT INTO registros (nome, tipo, codigo, data_retirada, hora_retirada) VALUES (?, ?, ?, ?, ?)",
+            cursor.execute("INSERT INTO registros (nome, tipo, codigo, data_retirada, hora_retirada) VALUES (%s, %s, %s, %s, %s)",
                            (nome, tipo, codigo, data, hora))
             conn.commit()
             messagebox.showinfo("Sucesso", "Retirada registrada.")
 
     elif acao == "Devolução":
-        cursor.execute("SELECT id, nome FROM registros WHERE codigo = ? AND data_devolucao IS NULL ORDER BY id DESC LIMIT 1",
+        cursor.execute("SELECT id, nome FROM registros WHERE codigo = %s AND data_devolucao IS NULL ORDER BY id DESC LIMIT 1",
                        (codigo,))
         resultado = cursor.fetchone()
         if resultado:
             id_registro, nome = resultado
-            cursor.execute("UPDATE registros SET data_devolucao = ?, hora_devolucao = ? WHERE id = ?",
+            cursor.execute("UPDATE registros SET data_devolucao = %s, hora_devolucao = %s WHERE id = %s",
                            (data, hora, id_registro))
             conn.commit()
             messagebox.showinfo("Sucesso", f"Devolução registrada para {nome}.")
@@ -96,19 +80,19 @@ def criar_botao(master, texto, comando, bg_color, fg_color, largura=200, altura=
 
 def filtrar_colaboradores(combo, var):
     texto = var.get().lower()
-    opcoes_filtradas = [nome for nome in COLABORADORES if nome.lower().startswith(texto)]
+    opcoes_filtradas = [nome for nome in carregar_colaboradores() if nome.lower().startswith(texto)]
     combo['values'] = opcoes_filtradas
     if opcoes_filtradas:
         combo.event_generate('<Down>')
 
-def voltar_para_menu(janela_atual, usuario):
+def voltar_para_menu(janela_atual, usuario_logado):
     janela_atual.destroy()
-    if usuario == "admin":
+    if usuario_logado == "admin":
         from login import menu_admin
-        menu_admin()
+        menu_admin(usuario_logado)
     else:
-        from login import tela_login
-        tela_login()
+        from login import menu_usuario
+        menu_usuario(usuario_logado)
 
       
 
@@ -119,15 +103,6 @@ def iniciar_interface(usuario_logado):
     janela.resizable(False, False)
     janela.configure(bg=COR_FUNDO)
 
-    try:
-        imagem = Image.open("logo.png").resize((180, 45))
-        logo_img = ImageTk.PhotoImage(imagem)
-        logo_label = tk.Label(janela, image=logo_img, bg=COR_FUNDO)
-        logo_label.image = logo_img
-        logo_label.pack(pady=(20, 10))
-    except:
-        tk.Label(janela, text="LOGOMARCA", font=("Segoe UI", 14, "bold"), bg=COR_FUNDO).pack(pady=(20, 10))
-
     frame = tk.Frame(janela, bg=COR_FUNDO)
     frame.pack(pady=10)
     frame.grid_columnconfigure(0, minsize=120)
@@ -137,7 +112,7 @@ def iniciar_interface(usuario_logado):
 
     tk.Label(frame, text="Colaborador:", font=("Segoe UI", 10, "bold"), bg=COR_FUNDO).grid(row=0, column=0, sticky="w", padx=5, pady=5)
     colaborador_var = tk.StringVar()
-    colaborador_combo = ttk.Combobox(frame, textvariable=colaborador_var, values=COLABORADORES, width=30)
+    colaborador_combo = ttk.Combobox(frame, textvariable=colaborador_var, values=carregar_colaboradores(), width=30)
     colaborador_combo.grid(row=0, column=1, padx=5, pady=5)
     colaborador_combo.bind("<KeyRelease>", lambda e: filtrar_colaboradores(colaborador_combo, colaborador_var))
 
@@ -155,6 +130,5 @@ def iniciar_interface(usuario_logado):
     botoes_frame.pack(pady=30)
 
     criar_botao(botoes_frame, "\ud83d\udce6 Retirar", lambda: registrar_acao("Retirada", colaborador_var, tipo_var, codigo_entry), COR_VERDE, "white").pack(side="left", padx=20)
-    # criar_botao(botoes_frame, "\u2705 Devolver", lambda: registrar_acao("Devolução", colaborador_var, tipo_var, codigo_entry), COR_AMARELO, "black").pack(side="left", padx=20)
 
     janela.mainloop()
