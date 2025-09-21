@@ -21,9 +21,11 @@ Este projeto foi desenvolvido em **Python + Tkinter + PostgreSQL** para auxiliar
 - **python-dotenv** (variáveis de ambiente)
 - **openpyxl** (exportação Excel)
 
-## 📦 Instalação
+## 📊 Estrutura do Banco
 
-1. Clone o repositório:
-   ```bash
-   git clone https://github.com/seu-usuario/gestao-de-fardamentos.git
-   cd gestao-de-fardamentos
+- usuarios → controle de login
+- colaboradores → colaboradores que retiram fardas
+- registros → movimentações (retirada e devolução)
+
+👤 Autor
+Desenvolvido por Anderson Sousa.
